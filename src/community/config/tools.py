@@ -1,7 +1,10 @@
 from enum import StrEnum
 
 from community.tools import Category, ManagedTool
-from community.tools.function_tools import WolframAlphaFunctionTool
+from community.tools.function_tools import (
+    GeoNamesFunctionTool,
+    WolframAlphaFunctionTool,
+)
 from community.tools.retrieval import (
     ArxivRetriever,
     ConnectorRetriever,
@@ -16,6 +19,7 @@ class CommunityToolName(StrEnum):
     Pub_Med = "Pub Med"
     File_Upload_LlamaIndex = "File Reader - LlamaIndex"
     Wolfram_Alpha = "Wolfram_Alpha"
+    GeoNames = "GeoNames"
 
 
 COMMUNITY_TOOLS = {
@@ -64,6 +68,27 @@ COMMUNITY_TOOLS = {
         category=Category.Function,
         description="Evaluate arithmetic expressions.",
     ),
+    CommunityToolName.GeoNames: ManagedTool(
+        name=CommunityToolName.GeoNames,
+        implementation=GeoNamesFunctionTool,
+        parameter_definitions={
+            "name": {
+                "description": "Name of the place to query",
+                "type": "str",
+                "required": True,
+            },
+            "country": {
+                "description": "Country of the place for qeury context",
+                "type": "str",
+                "required": False,
+            },
+        },
+        is_visible=True,
+        is_available=GeoNamesFunctionTool.is_available(),
+        error_message="GeoNamesFunctionTool is not available, please set the GEONAMES_USERNAME environment variable.",
+        category=Category.Function,
+        description="Query GeoNames.org for location information for a place.",
+    ),
 }
 
 # For main.py cli setup script
@@ -71,6 +96,11 @@ COMMUNITY_TOOLS_SETUP = {
     CommunityToolName.Wolfram_Alpha: {
         "secrets": [
             "WOLFRAM_ALPHA_APP_ID",
+        ],
+    },
+    CommunityToolName.GeoNames: {
+        "secrets": [
+            "GEONAMES_USERNAME",
         ],
     },
 }
